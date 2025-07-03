@@ -2,6 +2,9 @@
 
 Este projeto configura um ambiente com **4 serviços via Docker Compose** para atender aos requisitos da Avaliação N3 da disciplina de Redes.
 
+## Alunos: Geison Carlos Melo e Leonardo Anders
+
+
 ## Serviços configurados
 
 - **NGINX** – Servidor de proxy reverso, redireciona `/prova` para o WordPress
