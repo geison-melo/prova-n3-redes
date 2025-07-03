@@ -1,70 +1,55 @@
-version: '3.8'
-
 services:
   mysql:
     image: mysql:5.7
-    container_name: mysql_db
-    restart: always
+    platform: linux/amd64
     environment:
-      MYSQL_ROOT_PASSWORD: "root123"
-      MYSQL_DATABASE: "wordpress_db"
-      MYSQL_USER: "wordpress_user"
-      MYSQL_PASSWORD: "wp_user_pass"
+      MYSQL_ROOT_PASSWORD: exemploRoot123
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wpuser
+      MYSQL_PASSWORD: wppassword
+      MYSQL_ROOT_HOST: "%"
     volumes:
-      - db_data:/var/lib/mysql
-    networks:
-      - app-network
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -pexemploRoot123"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   wordpress:
-    depends_on:
-      - mysql
     image: wordpress:latest
-    container_name: wordpress_app
-    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
     environment:
-      WORDPRESS_DB_HOST: "mysql" # Aponta para o serviço mysql
-      WORDPRESS_DB_USER: "wordpress_user"
-      WORDPRESS_DB_PASSWORD: "wp_user_pass"
-      WORDPRESS_DB_NAME: "wordpress_db"
-      # As linhas abaixo ajudam o WordPress a entender que ele está rodando em um subdiretório
-      WORDPRESS_CONFIG_EXTRA: |
-        define('WP_SITEURL', 'http://' . $_SERVER['HTTP_HOST'] . '/prova');
-        define('WP_HOME', 'http://' . $_SERVER['HTTP_HOST'] . '/prova');
+      WORDPRESS_DB_HOST: mysql:3306
+      WORDPRESS_DB_USER: wpuser
+      WORDPRESS_DB_PASSWORD: wppassword
+      WORDPRESS_DB_NAME: wordpress
     volumes:
-      - wp_data:/var/www/html
-    networks:
-      - app-network
+      - ./wp-config-extra.php:/var/www/html/wp-config-extra.php
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: wpuser
+      PMA_PASSWORD: wppassword
+    ports:
+      - "8080:80"
 
   nginx:
-    depends_on:
-      - wordpress
     image: nginx:latest
-    container_name: nginx_proxy
-    restart: always
     ports:
       - "80:80"
     volumes:
-      - ./nginx:/etc/nginx/conf.d
-    networks:
-      - app-network
-
-  phpmyadmin:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
-      - mysql
-    image: phpmyadmin/phpmyadmin
-    container_name: phpmyadmin_ui
-    restart: always
-    environment:
-      PMA_HOST: "mysql"
-      MYSQL_ROOT_PASSWORD: "root123"
-    ports:
-      - "8081:80" # Acessível em http://localhost:8081
-    networks:
-      - app-network
-volumes:
-  db_data:
-  wp_data:
+      wordpress:
+        condition: service_started
 
-networks:
-  app-network:
-    driver: bridge
+volumes:
+  mysql_data:

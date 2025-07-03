@@ -1,37 +1,59 @@
-# Projeto Avaliação N3 - Redes
+# PROVA N3 - REDES
 
-## Integrantes
+Este projeto configura um ambiente com **4 serviços via Docker Compose** para atender aos requisitos da Avaliação N3 da disciplina de Redes.
 
-- Leonardo Anders
-- Lucas Setter Veiga
-- Thiago Maes
-- Geison Carlos Melo
+## Serviços configurados
 
-## Descrição
+- **NGINX** – Servidor de proxy reverso, redireciona `/prova` para o WordPress
+- **MySQL 5.7** – Banco de dados utilizado pelo WordPress
+- **WordPress** – Aplicação principal da prova, acessível via NGINX
+- **phpMyAdmin** – Interface web para administrar o banco de dados
 
-Este projeto utiliza Docker Compose para criar um ambiente com quatro serviços: Nginx, WordPress, MySQL e phpMyAdmin.
+## Estrutura do projeto
 
-O objetivo é configurar o Nginx como um proxy reverso para que a aplicação WordPress seja acessível apenas através do caminho `/prova`.
+```
+prova-n3-redes/
+├── docker-compose.yml
+├── nginx/
+│   └── default.conf
+├── wp-config-extra.php
+└── README.md
+```
 
-## Pré-requisitos
+## Como executar
 
-- Docker
-- Docker Compose
+1. Clone o repositório:
 
-## Como Executar
+   ```bash
+   git clone https://github.com/seu-usuario/prova-n3-redes.git
+   cd prova-n3-redes
+   ```
 
-1.  Clone este repositório.
-2.  Abra um terminal na pasta do projeto.
-3.  Execute o seguinte comando para iniciar a aplicação:
+2. Suba os containers:
 
-    ```bash
-    docker-compose up -d
-    ```
+   ```bash
+   docker compose up -d
+   ```
 
-## Acesso aos Serviços
+3. Acesse no navegador:
 
-Após a execução, os serviços estarão disponíveis nos seguintes endereços:
+   - WordPress: [http://localhost/prova](http://localhost/prova)
+   - phpMyAdmin: [http://localhost:8080](http://localhost:8080)
 
-- **WordPress:** [http://localhost/prova](http://localhost/prova)
-- **phpMyAdmin:** [http://localhost:8081](http://localhost:8081)
-- **Página Padrão Nginx:** [http://localhost/](http://localhost/)
+> O WordPress **não está disponível em http://localhost/** diretamente. O acesso correto é via `/prova`, conforme exigido na prova.
+
+## Configurações importantes
+
+- O NGINX redireciona `/prova/` para o serviço `wordpress`.
+- O WordPress foi configurado para funcionar em `/prova` via `wp-config-extra.php`.
+- O MySQL usa o usuário `wpuser` com o banco `wordpress`.
+
+## Requisitos atendidos
+
+- [x] docker-compose funcional com 4 serviços
+- [x] WordPress acessível via `/prova`
+- [x] phpMyAdmin funcionando em `localhost:8080`
+- [x] Acesso bloqueado em `localhost/`
+- [x] Banco de dados funcionando e conectado
+
+---
